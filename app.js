@@ -1,10 +1,10 @@
 var interval = 60;
-
+/*
 var canvas;
 var ctx;
 var width;
 var height;
-
+*/
 var config = {
     updatePeriod: 500,
 }
@@ -27,17 +27,12 @@ var model = {
     getStoneShape: function(index){
         // funny thing here: need to retrieve _a_copy_ of a shape but not a reference. This is done with the following workaround 
         return JSON.parse(JSON.stringify(model.stoneShapes[index]));
-    }
-}
-
-var mvc = {
-    paintCell: function(x, y, color){
-        ctx.fillStyle = color;
-        ctx.fillRect(x*cell_width, y*cell_width, cell_width, cell_width);
-        ctx.strokeStyle = "white";
-        ctx.strokeRect(x*cell_width, y*cell_width, cell_width, cell_width);
     },
     init: function(){
+        this.initBoard();
+        this.generateNewStone();
+    },
+    initBoard: function(){
         for(let y = 0; y < model.numRows; y++){
             let row = [];
             for(let x = 0; x < model.numCols; x++){
@@ -45,24 +40,33 @@ var mvc = {
             }
             model.board[y] = row;
         }
-        mvc.generateNewStone();
+    },
+    generateNewStone: function(){
+        model.currentStoneType = Math.floor(Math.random()*6) + 1;
+        let xOffset = 4;
+        let newStone = model.getStoneShape(model.currentStoneType);
+        for(let i = 0; i < newStone.length; i++){
+            newStone[i][0] += xOffset;
+        }
+        console.log("Created new stone: " + newStone.toString());
+        model.currentStone = newStone;
+    },
+}
+
+var mvc = {
+    
+    init: function(){
+        view.init();
+        model.init();
         setInterval(mvc.game,config.updatePeriod);
     },
-    renderBoard: function(){
-        for(let y = 0; y < model.board.length; y++){
-            let row = model.board[y];
-            for(let x = 0; x < row.length; x++){
-                mvc.paintCell(x,y,model.colorCode[row[x]]);
-            }
+    game: function(){
+        view.renderBoard();
+        view.renderCurrentStone();
+        let moveCode = mvc.dropCurrentStone();
+        if(moveCode === 1){
+            model.generateNewStone();
         }
-        return;
-    },
-    renderCurrentStone: function(){
-        for(let i = 0; i < model.currentStone.length; i++){
-            let curStoneCell = model.currentStone[i];
-            mvc.paintCell(curStoneCell[0],curStoneCell[1],model.colorCode[model.currentStoneType]);
-        }
-        return;
     },
     dropCurrentStone: function(){
         
@@ -118,25 +122,6 @@ var mvc = {
         }
         return isCollision;
     },
-    generateNewStone: function(){
-        model.currentStoneType = Math.floor(Math.random()*6) + 1;
-        let xOffset = 5;
-        //let newStone = model.stoneShapes[model.currentStoneType];
-        let newStone = model.getStoneShape(model.currentStoneType);
-        for(let i = 0; i < newStone.length; i++){
-            newStone[i][0] += xOffset;
-        }
-        console.log("Created new stone: " + newStone.toString());
-        model.currentStone = newStone;
-    },
-    game: function(){
-        mvc.renderBoard();
-        mvc.renderCurrentStone();
-        let moveCode = mvc.dropCurrentStone();
-        if(moveCode === 1){
-            mvc.generateNewStone();
-        }
-    },
     moveCurrentStone: function(direction){
         let xIncr;
         if(direction == "left"){
@@ -182,22 +167,52 @@ var mvc = {
         return contains;
     },
     rotateCurrentStone: function(){
+
+    }
+}
+
+var view = {
+    canvas: [],
+    ctx: [],
+    width: 0,
+    heigth: 0,
+    cell_width: 0,
+    paintCell: function(x, y, color){
+        this.ctx.fillStyle = color;
+        this.ctx.fillRect(x*this.cell_width, y*this.cell_width, this.cell_width, this.cell_width);
+        this.ctx.strokeStyle = "white";
+        this.ctx.strokeRect(x*this.cell_width, y*this.cell_width, this.cell_width, this.cell_width);
+    },
+    renderBoard: function(){
+        for(let y = 0; y < model.board.length; y++){
+            let row = model.board[y];
+            for(let x = 0; x < row.length; x++){
+                view.paintCell(x,y,model.colorCode[row[x]]);
+            }
+        }
+        return;
+    },
+    renderCurrentStone: function(){
+        for(let i = 0; i < model.currentStone.length; i++){
+            let curStoneCell = model.currentStone[i];
+            view.paintCell(curStoneCell[0],curStoneCell[1],model.colorCode[model.currentStoneType]);
+        }
+        return;
+    },
+    init: function(){
+        //Canvas stuff
+        this.canvas = $("#canvas")[0];
+        this.ctx = canvas.getContext("2d");
+        this.width = $("#canvas").width();
+        this.height = $("#canvas").height();
         
+        //Lets save the cell width in a variable for easy control
+        this.cell_width = this.height/model.numRows;
     }
 }
 
 $(document).ready(function(){
-	//Canvas stuff
-	canvas = $("#canvas")[0];
-	ctx = canvas.getContext("2d");
-	width = $("#canvas").width();
-	height = $("#canvas").height();
-	
-	//Lets save the cell width in a variable for easy control
-	cell_width = height/model.numRows;
-	
 	mvc.init();
-	
 });
 
 $(document).keydown(function(e){
@@ -211,3 +226,4 @@ $(document).keydown(function(e){
         mvc.moveCurrentStone("right");
     }
 });
+
