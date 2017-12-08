@@ -1,23 +1,16 @@
-var interval = 60;
-/*
-var canvas;
-var ctx;
-var width;
-var height;
-*/
 var config = {
     updatePeriod: 500,
+    colorCode: ["blue","red","yellow","green","orange","brown"],
+    backgroundColor: "black",
 }
 
 var model = {
     board: [],//[[0,0,0,0,0,0],[0,0,0,0,0,0],[0,1,1,0,1,0],...] board[y][x]
     numCols: 9,
     numRows: 10,
-    currentStone: [[4,1],[4,2]], //[[1,2],[1,3],...] [[x1,y1],[x2,y2],...]
+    currentStone: [], //[[1,2],[1,3],...] [[x1,y1],[x2,y2],...]
     currentStoneType: 1,
-    colorCode: ["black","blue","red","yellow","green","orange","brown"],
-    stoneShapes: [[],
-                  [[0,0],[0,1],[1,0],[1,1]],
+    stoneShapes: [[[0,0],[0,1],[1,0],[1,1]],
                   [[0,0],[0,1],[1,1],[1,2]],
                   [[0,0],[1,0],[1,1],[2,1]],
                   [[0,0],[0,1],[0,2],[0,3]],
@@ -36,14 +29,16 @@ var model = {
         for(let y = 0; y < model.numRows; y++){
             let row = [];
             for(let x = 0; x < model.numCols; x++){
-                row[x] = 0;
+                row[x] = -1;
             }
             model.board[y] = row;
         }
     },
     generateNewStone: function(){
-        model.currentStoneType = Math.floor(Math.random()*6) + 1;
+        let numberOfStoneTypes = config.colorCode.length;
+        model.currentStoneType = Math.floor(Math.random() * numberOfStoneTypes);
         let xOffset = 4;
+        console.log("Chose following stone type: " + model.currentStoneType);
         let newStone = model.getStoneShape(model.currentStoneType);
         for(let i = 0; i < newStone.length; i++){
             newStone[i][0] += xOffset;
@@ -58,11 +53,11 @@ var mvc = {
     init: function(){
         view.init();
         model.init();
-        setInterval(mvc.game,config.updatePeriod);
+        setInterval(this.game,config.updatePeriod);
     },
     game: function(){
-        view.renderBoard();
-        view.renderCurrentStone();
+        view.renderBoard(model.board);
+        view.renderCurrentStone(model.currentStone,model.currentStoneType);
         let moveCode = mvc.dropCurrentStone();
         if(moveCode === 1){
             model.generateNewStone();
@@ -70,7 +65,7 @@ var mvc = {
     },
     dropCurrentStone: function(){
         
-        if(!mvc.checkCollisionOnDrop()){
+        if(!this.checkCollisionOnDrop()){
 
             for(let i = 0; i < model.currentStone.length; i++){
                 let currentCell = model.currentStone[i];
@@ -92,12 +87,12 @@ var mvc = {
         for(let i = 0; i < model.currentStone.length; i++){
             let stoneCell = model.currentStone[i];
             let droppedCell = [stoneCell[0],stoneCell[1]+1];
-            if(!mvc.stoneContainsCell(model.currentStone,droppedCell)){
+            if(!this.stoneContainsCell(model.currentStone,droppedCell)){
                 if(droppedCell[1] >= model.numRows){
                     console.log("Stone reached bottom");
                     isCollision = true;
                     break;
-                }else if(model.board[droppedCell[1]][droppedCell[0]] != 0 ){
+                }else if(model.board[droppedCell[1]][droppedCell[0]] != -1 ){
                     console.log("Stone reached other stone");
                     isCollision = true;
                     break;
@@ -112,8 +107,8 @@ var mvc = {
         for(let i = 0; i < model.currentStone.length; i++){
             let stoneCell = model.currentStone[i];
             let shiftedCell = [stoneCell[0]+xIncr,stoneCell[1]];
-            if(!mvc.stoneContainsCell(model.currentStone,shiftedCell)){
-                if(model.board[shiftedCell[1]][shiftedCell[0]] != 0 ){
+            if(!this.stoneContainsCell(model.currentStone,shiftedCell)){
+                if(model.board[shiftedCell[1]][shiftedCell[0]] != -1 ){
                     console.log("Stone reached other stone");
                     isCollision = true;
                     break;
@@ -183,19 +178,23 @@ var view = {
         this.ctx.strokeStyle = "white";
         this.ctx.strokeRect(x*this.cell_width, y*this.cell_width, this.cell_width, this.cell_width);
     },
-    renderBoard: function(){
-        for(let y = 0; y < model.board.length; y++){
-            let row = model.board[y];
+    renderBoard: function(board){
+        for(let y = 0; y < board.length; y++){
+            let row = board[y];
             for(let x = 0; x < row.length; x++){
-                view.paintCell(x,y,model.colorCode[row[x]]);
+                if(row[x] == -1){
+                    this.paintCell(x,y,config.backgroundColor);
+                }else{
+                    this.paintCell(x,y,config.colorCode[row[x]]);
+                }
             }
         }
         return;
     },
-    renderCurrentStone: function(){
-        for(let i = 0; i < model.currentStone.length; i++){
-            let curStoneCell = model.currentStone[i];
-            view.paintCell(curStoneCell[0],curStoneCell[1],model.colorCode[model.currentStoneType]);
+    renderCurrentStone: function(currentStone, currentStoneType){
+        for(let i = 0; i < currentStone.length; i++){
+            let curStoneCell = currentStone[i];
+            this.paintCell(curStoneCell[0], curStoneCell[1], config.colorCode[currentStoneType]);
         }
         return;
     },
@@ -206,7 +205,6 @@ var view = {
         this.width = $("#canvas").width();
         this.height = $("#canvas").height();
         
-        //Lets save the cell width in a variable for easy control
         this.cell_width = this.height/model.numRows;
     }
 }
