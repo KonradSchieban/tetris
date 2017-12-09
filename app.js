@@ -17,6 +17,9 @@ var model = {
                   [[0,0],[1,0],[2,0],[1,1]],
                   [[0,0],[0,1],[0,2],[1,2]],
                   [[0,0],[1,0],[2,0],[2,1]]],
+    getBoardCopy: function(){
+        return JSON.parse(JSON.stringify(model.board));
+    },
     getStoneShape: function(index){
         // funny thing here: need to retrieve _a_copy_ of a shape but not a reference. This is done with the following workaround 
         return JSON.parse(JSON.stringify(model.stoneShapes[index]));
@@ -37,13 +40,14 @@ var model = {
     generateNewStone: function(){
         let numberOfStoneTypes = config.colorCode.length;
         model.currentStoneType = Math.floor(Math.random() * numberOfStoneTypes);
+        //model.currentStoneType = 3;
         let xOffset = 4;
-        console.log("Chose following stone type: " + model.currentStoneType);
+        //console.log("Chose following stone type: " + model.currentStoneType);
         let newStone = model.getStoneShape(model.currentStoneType);
         for(let i = 0; i < newStone.length; i++){
             newStone[i][0] += xOffset;
         }
-        console.log("Created new stone: " + newStone.toString());
+        //console.log("Created new stone: " + newStone.toString());
         model.currentStone = newStone;
     },
 }
@@ -76,7 +80,12 @@ var mvc = {
         }else{
             for(let i = 0; i < model.currentStone.length; i++){
                 let currentCell = model.currentStone[i];
-                model.board[currentCell[1]][currentCell[0]] = model.currentStoneType; // do I really need this line?
+                model.board[currentCell[1]][currentCell[0]] = model.currentStoneType;
+            }
+
+            let fullRowArray = this.getFullRows(model.board); 
+            if(fullRowArray.length > 0){
+                this.dropFullRows(fullRowArray, model.board);
             }
             return 1;
         }
@@ -89,11 +98,11 @@ var mvc = {
             let droppedCell = [stoneCell[0],stoneCell[1]+1];
             if(!this.stoneContainsCell(model.currentStone,droppedCell)){
                 if(droppedCell[1] >= model.numRows){
-                    console.log("Stone reached bottom");
+                    //console.log("Stone reached bottom");
                     isCollision = true;
                     break;
                 }else if(model.board[droppedCell[1]][droppedCell[0]] != -1 ){
-                    console.log("Stone reached other stone");
+                    //console.log("Stone reached other stone");
                     isCollision = true;
                     break;
                 }
@@ -109,7 +118,7 @@ var mvc = {
             let shiftedCell = [stoneCell[0]+xIncr,stoneCell[1]];
             if(!this.stoneContainsCell(model.currentStone,shiftedCell)){
                 if(model.board[shiftedCell[1]][shiftedCell[0]] != -1 ){
-                    console.log("Stone reached other stone");
+                    //console.log("Stone reached other stone");
                     isCollision = true;
                     break;
                 }
@@ -120,10 +129,8 @@ var mvc = {
     moveCurrentStone: function(direction){
         let xIncr;
         if(direction == "left"){
-            console.log("moving left");
             xIncr = -1;
         }else if(direction == "right"){
-            console.log("moving right");
             xIncr = 1;
         }
         if(mvc.checkMovePossible(xIncr)){
@@ -161,8 +168,43 @@ var mvc = {
         }
         return contains;
     },
-    rotateCurrentStone: function(){
-
+    isRowFull: function(rowIndex){
+        let row = model.board[rowIndex];
+        let rowFull = true;
+        for(let i = 0; i < row.length; i++){
+            if(row[i] === -1){
+                rowFull = false;
+                break;
+            }
+        }
+        return rowFull;
+    },
+    getFullRows: function(board){
+        let numberOfRows = board.length;
+        let fullRowArray = [];
+        for(let i = 0; i < numberOfRows; i++){
+            if(this.isRowFull(i)){
+                fullRowArray.push(i);
+            }
+        }
+        return fullRowArray;
+    },
+    dropFullRows: function(fullRowArray, board){
+    
+        // Delete full rows
+        for(let j = 0; j < fullRowArray.length; j++){
+            let rowIndex = fullRowArray[j];
+            
+            for(let k = rowIndex; k > 0; k--){
+                
+                let row = board[k];
+                let rowAbove = board[k-1];
+                for(let i = 0; i < row.length; i++){
+                    row[i] = rowAbove[i];
+                }
+                board[k] = row;
+            }
+        }
     }
 }
 
