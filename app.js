@@ -1,6 +1,6 @@
 var config = {
-    updatePeriod: 500,
-    colorCode: ["blue","red","yellow","green","orange","brown"],
+    updatePeriod: 400,
+    colorCode: ["blue","red","yellow","green","orange","brown","darkred"],
     backgroundColor: "black",
 }
 
@@ -10,13 +10,14 @@ var model = {
     numRows: 10,
     currentStone: [], //[[1,2],[1,3],...] [[x1,y1],[x2,y2],...]
     currentStoneType: 1,
+    currentStoneRotation: 0,
     stoneShapes: [[[0,0],[0,1],[1,0],[1,1]],
                   [[0,0],[0,1],[1,1],[1,2]],
                   [[0,0],[1,0],[1,1],[2,1]],
                   [[0,0],[0,1],[0,2],[0,3]],
                   [[0,0],[1,0],[2,0],[1,1]],
                   [[0,0],[0,1],[0,2],[1,2]],
-                  [[0,0],[1,0],[2,0],[2,1]]],
+                  [[0,0],[0,1],[0,2],[-1,2]]],
     getBoardCopy: function(){
         return JSON.parse(JSON.stringify(model.board));
     },
@@ -40,15 +41,16 @@ var model = {
     generateNewStone: function(){
         let numberOfStoneTypes = config.colorCode.length;
         model.currentStoneType = Math.floor(Math.random() * numberOfStoneTypes);
-        //model.currentStoneType = 3;
+        //model.currentStoneType = 4;
         let xOffset = 4;
-        //console.log("Chose following stone type: " + model.currentStoneType);
+ 
         let newStone = model.getStoneShape(model.currentStoneType);
         for(let i = 0; i < newStone.length; i++){
             newStone[i][0] += xOffset;
         }
-        //console.log("Created new stone: " + newStone.toString());
+
         model.currentStone = newStone;
+        model.currentStoneRotation = 0;
     },
 }
 
@@ -60,8 +62,7 @@ var mvc = {
         setInterval(this.game,config.updatePeriod);
     },
     game: function(){
-        view.renderBoard(model.board);
-        view.renderCurrentStone(model.currentStone,model.currentStoneType);
+        view.renderScene(model.board,model.currentStone,model.currentStoneType);
         let moveCode = mvc.dropCurrentStone();
         if(moveCode === 1){
             model.generateNewStone();
@@ -140,6 +141,7 @@ var mvc = {
                 model.currentStone[i] = newCurrentStoneCell;
             }
         }
+        view.renderScene(model.board,model.currentStone,model.currentStoneType);
     },
     checkMovePossible: function(xIncr){
         let isMovePossible = true;
@@ -205,6 +207,216 @@ var mvc = {
                 board[k] = row;
             }
         }
+    },
+    rotateCurrentStone: function(){
+        switch(model.currentStoneType){
+            case 0:
+                // [[0,0],[0,1],[1,0],[1,1]]
+                /*
+                    ##     
+                    ##
+                */
+                console.log("Stone 0");
+                break;
+            case 1:
+                if(model.currentStoneRotation % 2 === 0){
+                    // [[0,0],[0,1],[1,1],[1,2]]
+                    /*
+                        #     
+                        ##   =>    ##
+                         #        ##
+                    */
+                    if(this.checkMovePossible(1)){
+                        model.currentStone[0] = [model.currentStone[0][0]+2,model.currentStone[0][1]+1];
+                        model.currentStone[1] = [model.currentStone[1][0],model.currentStone[1][1]+1];
+                        model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                    }
+                }else{
+                    /*
+                                  #     
+                         ##  =>   ##
+                        ##         #
+                    */
+                    model.currentStone[0] = [model.currentStone[0][0]-2,model.currentStone[0][1]-1];
+                    model.currentStone[1] = [model.currentStone[1][0],model.currentStone[1][1]-1];
+                    model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                }
+                break;
+            case 2:
+                if(model.currentStoneRotation % 2 === 0){
+                    //[[0,0],[1,0],[1,1],[2,1]]
+                    /*
+                                   #     
+                        ##   =>   ##
+                         ##       #
+                    */
+                    model.currentStone[0] = [model.currentStone[0][0]+2,model.currentStone[0][1]];
+                    model.currentStone[3] = [model.currentStone[3][0],model.currentStone[3][1]-2];
+                    model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                }else{
+                    /*
+                            #     
+                           ##    =>   ##
+                           #           ##
+                    */
+                    if(this.checkMovePossible(-1)){
+                        model.currentStone[0] = [model.currentStone[0][0]-2,model.currentStone[0][1]];
+                        model.currentStone[3] = [model.currentStone[3][0],model.currentStone[3][1]+2];
+                        model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                    }
+                }
+                break;
+            case 3:
+                if(model.currentStoneRotation % 2 === 0){
+                    //[[0,0],[0,1],[0,2],[0,3]]
+                    /*
+                            #
+                            #
+                            #   =>  ####
+                            #
+                    */
+                    if(this.checkMovePossible(-1) && this.checkMovePossible(2)){
+                        model.currentStone[0] = [model.currentStone[0][0]+2,model.currentStone[0][1]+2];
+                        model.currentStone[1] = [model.currentStone[1][0]+1,model.currentStone[1][1]+1];
+                        model.currentStone[3] = [model.currentStone[3][0]-1,model.currentStone[3][1]-1];
+                        model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                    }
+                }else{
+                    /*
+                                           #
+                                           #
+                           ####    =>      #
+                                           #
+                    */
+                    model.currentStone[0] = [model.currentStone[0][0]-2,model.currentStone[0][1]-2];
+                    model.currentStone[1] = [model.currentStone[1][0]-1,model.currentStone[1][1]-1];
+                    model.currentStone[3] = [model.currentStone[3][0]+1,model.currentStone[3][1]+1];
+                    model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                }
+                break;
+            case 4:
+                if(model.currentStoneRotation % 4 === 0){
+                    //[[0,0],[1,0],[2,0],[1,1]]
+                    /*
+                                          #
+                           ###    =>     ##
+                            #             #
+                    */
+                    model.currentStone[2] = [model.currentStone[2][0]-1,model.currentStone[2][1]-1];
+                    model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                }else if(model.currentStoneRotation % 4 === 1){
+                    /*
+                            #            #
+                           ##    =>     ###
+                            #             
+                    */
+                    if(this.checkMovePossible(1)){
+                        model.currentStone[3] = [model.currentStone[3][0]+1,model.currentStone[3][1]-1];
+                        model.currentStoneRotation = (model.currentStoneRotation + 1) % 4;
+                    }
+                }else if(model.currentStoneRotation % 4 === 2){
+                    /*
+                            #            #
+                           ###   =>      ##
+                                         #
+                    */
+                    model.currentStone[0] = [model.currentStone[0][0]+1,model.currentStone[0][1]+1];
+                    model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                }else if(model.currentStoneRotation % 4 === 3){
+                    /*
+                            #            #
+                            ##   =>     ###
+                            #            
+                    */
+                    if(this.checkMovePossible(-1)){
+                        model.currentStone[0] = [model.currentStone[0][0]-1,model.currentStone[0][1]-1];
+                        model.currentStone[2] = [model.currentStone[2][0]+1,model.currentStone[2][1]+1];
+                        model.currentStone[3] = [model.currentStone[3][0]-1,model.currentStone[3][1]+1];
+                        model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                    }
+                }
+                break;
+            case 5:
+                //[[0,0],[0,1],[0,2],[1,2]]
+                if(model.currentStoneRotation % 4 === 0){
+                    /*
+                            #            
+                            #   =>      ###
+                            ##          #
+                    */
+                    if(this.checkMovePossible(-1)){
+                        model.currentStone[0] = [model.currentStone[0][0]+1,model.currentStone[0][1]+1];
+                        model.currentStone[2] = [model.currentStone[2][0]-1,model.currentStone[2][1]-1];
+                        model.currentStone[3] = [model.currentStone[3][0]-2,model.currentStone[3][1]];
+                        model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                    }
+                }else if(model.currentStoneRotation % 4 === 1){
+                    /*
+                                        ##
+                           ###   =>      #
+                           #             #
+                    */
+                    model.currentStone[0] = [model.currentStone[0][0]-1,model.currentStone[0][1]+1];
+                    model.currentStone[2] = [model.currentStone[2][0]+1,model.currentStone[2][1]-1];
+                    model.currentStone[3] = [model.currentStone[3][0],model.currentStone[3][1]-2];
+                    model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                }else if(model.currentStoneRotation % 4 === 2){
+                    /*
+                           ##             #
+                            #   =>      ###
+                            #             
+                    */
+                    if(this.checkMovePossible(1)){
+                        model.currentStone[0] = [model.currentStone[0][0]-1,model.currentStone[0][1]-1];
+                        model.currentStone[2] = [model.currentStone[2][0]+1,model.currentStone[2][1]+1];
+                        model.currentStone[3] = [model.currentStone[3][0]+2,model.currentStone[3][1]];
+                        model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                    }
+                }else if(model.currentStoneRotation % 4 === 3){
+                    /*
+                             #           #
+                           ###   =>      #
+                                         ##
+                    */
+                    model.currentStone[0] = [model.currentStone[0][0]+1,model.currentStone[0][1]-1];
+                    model.currentStone[2] = [model.currentStone[2][0]-1,model.currentStone[2][1]+1];
+                    model.currentStone[3] = [model.currentStone[3][0],model.currentStone[3][1]+2];
+                    model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                }
+                break;
+            case 6:
+                //[[0,0],[0,1],[0,2],[-1,2]]
+                if(model.currentStoneRotation % 4 === 0){
+                    if(this.checkMovePossible(1)){
+                        model.currentStone[0] = [model.currentStone[0][0]+1,model.currentStone[0][1]+1];
+                        model.currentStone[2] = [model.currentStone[2][0]-1,model.currentStone[2][1]-1];
+                        model.currentStone[3] = [model.currentStone[3][0],model.currentStone[3][1]-2];
+                        model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                    }
+                }else if(model.currentStoneRotation % 4 === 1){
+                    model.currentStone[0] = [model.currentStone[0][0]-1,model.currentStone[0][1]+1];
+                    model.currentStone[2] = [model.currentStone[2][0]+1,model.currentStone[2][1]-1];
+                    model.currentStone[3] = [model.currentStone[3][0]+2,model.currentStone[3][1]];
+                    model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                }else if(model.currentStoneRotation % 4 === 2){
+                    if(this.checkMovePossible(-1)){
+                        model.currentStone[0] = [model.currentStone[0][0]-1,model.currentStone[0][1]-1];
+                        model.currentStone[2] = [model.currentStone[2][0]+1,model.currentStone[2][1]+1];
+                        model.currentStone[3] = [model.currentStone[3][0],model.currentStone[3][1]+2];
+                        model.currentStoneRotation = (model.currentStoneRotation + 1) % 4;
+                    }
+                }else if(model.currentStoneRotation % 4 === 3){
+                    model.currentStone[0] = [model.currentStone[0][0]+1,model.currentStone[0][1]-1];
+                    model.currentStone[2] = [model.currentStone[2][0]-1,model.currentStone[2][1]+1];
+                    model.currentStone[3] = [model.currentStone[3][0]-2,model.currentStone[3][1]];
+                    model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                }
+                break;
+            default:
+                console.log("Rotation not implemented yet!");
+        }
+        
+        view.renderScene(model.board,model.currentStone,model.currentStoneType);
     }
 }
 
@@ -239,6 +451,10 @@ var view = {
             this.paintCell(curStoneCell[0], curStoneCell[1], config.colorCode[currentStoneType]);
         }
         return;
+    },
+    renderScene: function(board, currentStone, currentStoneType){
+        view.renderBoard(board);
+        view.renderCurrentStone(currentStone, currentStoneType);
     },
     init: function(){
         //Canvas stuff
