@@ -7,7 +7,7 @@ var config = {
 var model = {
     board: [],//[[0,0,0,0,0,0],[0,0,0,0,0,0],[0,1,1,0,1,0],...] board[y][x]
     numCols: 9,
-    numRows: 10,
+    numRows: 15,
     currentStone: [], //[[1,2],[1,3],...] [[x1,y1],[x2,y2],...]
     currentStoneType: 1,
     currentStoneRotation: 0,
@@ -41,7 +41,7 @@ var model = {
     generateNewStone: function(){
         let numberOfStoneTypes = config.colorCode.length;
         model.currentStoneType = Math.floor(Math.random() * numberOfStoneTypes);
-        //model.currentStoneType = 4;
+        //model.currentStoneType = 6;
         let xOffset = 4;
  
         let newStone = model.getStoneShape(model.currentStoneType);
@@ -208,7 +208,8 @@ var mvc = {
             }
         }
     },
-    rotateCurrentStone: function(){
+    rotateCurrentStone: function(rotationIncr){
+        console.log(model.currentStoneRotation);
         switch(model.currentStoneType){
             case 0:
                 // [[0,0],[0,1],[1,0],[1,1]]
@@ -216,7 +217,6 @@ var mvc = {
                     ##     
                     ##
                 */
-                console.log("Stone 0");
                 break;
             case 1:
                 if(model.currentStoneRotation % 2 === 0){
@@ -229,7 +229,7 @@ var mvc = {
                     if(this.checkMovePossible(1)){
                         model.currentStone[0] = [model.currentStone[0][0]+2,model.currentStone[0][1]+1];
                         model.currentStone[1] = [model.currentStone[1][0],model.currentStone[1][1]+1];
-                        model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                        model.currentStoneRotation = (model.currentStoneRotation + rotationIncr + 4) % 4; 
                     }
                 }else{
                     /*
@@ -239,7 +239,7 @@ var mvc = {
                     */
                     model.currentStone[0] = [model.currentStone[0][0]-2,model.currentStone[0][1]-1];
                     model.currentStone[1] = [model.currentStone[1][0],model.currentStone[1][1]-1];
-                    model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                    model.currentStoneRotation = (model.currentStoneRotation + rotationIncr + 4) % 4; 
                 }
                 break;
             case 2:
@@ -252,7 +252,7 @@ var mvc = {
                     */
                     model.currentStone[0] = [model.currentStone[0][0]+2,model.currentStone[0][1]];
                     model.currentStone[3] = [model.currentStone[3][0],model.currentStone[3][1]-2];
-                    model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                    model.currentStoneRotation = (model.currentStoneRotation + rotationIncr + 4) % 4; 
                 }else{
                     /*
                             #     
@@ -262,7 +262,7 @@ var mvc = {
                     if(this.checkMovePossible(-1)){
                         model.currentStone[0] = [model.currentStone[0][0]-2,model.currentStone[0][1]];
                         model.currentStone[3] = [model.currentStone[3][0],model.currentStone[3][1]+2];
-                        model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                        model.currentStoneRotation = (model.currentStoneRotation + rotationIncr + 4) % 4; 
                     }
                 }
                 break;
@@ -279,7 +279,7 @@ var mvc = {
                         model.currentStone[0] = [model.currentStone[0][0]+2,model.currentStone[0][1]+2];
                         model.currentStone[1] = [model.currentStone[1][0]+1,model.currentStone[1][1]+1];
                         model.currentStone[3] = [model.currentStone[3][0]-1,model.currentStone[3][1]-1];
-                        model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                        model.currentStoneRotation = (model.currentStoneRotation + rotationIncr + 4) % 4; 
                     }
                 }else{
                     /*
@@ -291,7 +291,7 @@ var mvc = {
                     model.currentStone[0] = [model.currentStone[0][0]-2,model.currentStone[0][1]-2];
                     model.currentStone[1] = [model.currentStone[1][0]-1,model.currentStone[1][1]-1];
                     model.currentStone[3] = [model.currentStone[3][0]+1,model.currentStone[3][1]+1];
-                    model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                    model.currentStoneRotation = (model.currentStoneRotation + rotationIncr + 4) % 4; 
                 }
                 break;
             case 4:
@@ -302,37 +302,74 @@ var mvc = {
                            ###    =>     ##
                             #             #
                     */
-                    model.currentStone[2] = [model.currentStone[2][0]-1,model.currentStone[2][1]-1];
-                    model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                    if(rotationIncr === 1){
+                        model.currentStone[0] = [model.currentStone[0][0]+1,model.currentStone[0][1]-1];
+                        model.currentStone[2] = [model.currentStone[2][0]-1,model.currentStone[2][1]+1];
+                        model.currentStone[3] = [model.currentStone[3][0]-1,model.currentStone[3][1]-1];
+                    }else{
+                        model.currentStone[0] = [model.currentStone[0][0]+1,model.currentStone[0][1]+1];
+                        model.currentStone[2] = [model.currentStone[2][0]-1,model.currentStone[2][1]-1];
+                        model.currentStone[3] = [model.currentStone[3][0]+1,model.currentStone[3][1]-1];
+                    }
+                    model.currentStoneRotation = (model.currentStoneRotation + rotationIncr + 4) % 4; 
                 }else if(model.currentStoneRotation % 4 === 1){
                     /*
                             #            #
                            ##    =>     ###
                             #             
                     */
-                    if(this.checkMovePossible(1)){
-                        model.currentStone[3] = [model.currentStone[3][0]+1,model.currentStone[3][1]-1];
-                        model.currentStoneRotation = (model.currentStoneRotation + 1) % 4;
+                    if(rotationIncr === 1){
+                        if(this.checkMovePossible(1)){
+                            model.currentStone[0] = [model.currentStone[0][0]+1,model.currentStone[0][1]+1];
+                            model.currentStone[2] = [model.currentStone[2][0]-1,model.currentStone[2][1]-1];
+                            model.currentStone[3] = [model.currentStone[3][0]+1,model.currentStone[3][1]-1];
+                            model.currentStoneRotation = (model.currentStoneRotation + rotationIncr + 4) % 4;
+                        }
+                    }else{
+                        if(this.checkMovePossible(1)){
+                            model.currentStone[0] = [model.currentStone[0][0]-1,model.currentStone[0][1]+1];
+                            model.currentStone[2] = [model.currentStone[2][0]+1,model.currentStone[2][1]-1];
+                            model.currentStone[3] = [model.currentStone[3][0]+1,model.currentStone[3][1]+1];
+                            model.currentStoneRotation = (model.currentStoneRotation + rotationIncr + 4) % 4;
+                        }
                     }
+                    
                 }else if(model.currentStoneRotation % 4 === 2){
                     /*
                             #            #
                            ###   =>      ##
                                          #
                     */
-                    model.currentStone[0] = [model.currentStone[0][0]+1,model.currentStone[0][1]+1];
-                    model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                    if(rotationIncr === 1){
+                        model.currentStone[0] = [model.currentStone[0][0]-1,model.currentStone[0][1]+1];
+                        model.currentStone[2] = [model.currentStone[2][0]+1,model.currentStone[2][1]-1];
+                        model.currentStone[3] = [model.currentStone[3][0]+1,model.currentStone[3][1]+1];
+                    }else{
+                        model.currentStone[0] = [model.currentStone[0][0]-1,model.currentStone[0][1]-1];
+                        model.currentStone[2] = [model.currentStone[2][0]+1,model.currentStone[2][1]+1];
+                        model.currentStone[3] = [model.currentStone[3][0]-1,model.currentStone[3][1]+1];
+                    }
+                    model.currentStoneRotation = (model.currentStoneRotation + rotationIncr + 4) % 4; 
                 }else if(model.currentStoneRotation % 4 === 3){
                     /*
                             #            #
                             ##   =>     ###
                             #            
                     */
-                    if(this.checkMovePossible(-1)){
-                        model.currentStone[0] = [model.currentStone[0][0]-1,model.currentStone[0][1]-1];
-                        model.currentStone[2] = [model.currentStone[2][0]+1,model.currentStone[2][1]+1];
-                        model.currentStone[3] = [model.currentStone[3][0]-1,model.currentStone[3][1]+1];
-                        model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                    if(rotationIncr === 1){
+                        if(this.checkMovePossible(-1)){
+                            model.currentStone[0] = [model.currentStone[0][0]-1,model.currentStone[0][1]-1];
+                            model.currentStone[2] = [model.currentStone[2][0]+1,model.currentStone[2][1]+1];
+                            model.currentStone[3] = [model.currentStone[3][0]-1,model.currentStone[3][1]+1];
+                            model.currentStoneRotation = (model.currentStoneRotation + rotationIncr + 4) % 4; 
+                        }
+                    }else{
+                        if(this.checkMovePossible(-1)){
+                            model.currentStone[0] = [model.currentStone[0][0]+1,model.currentStone[0][1]-1];
+                            model.currentStone[2] = [model.currentStone[2][0]-1,model.currentStone[2][1]+1];
+                            model.currentStone[3] = [model.currentStone[3][0]-1,model.currentStone[3][1]-1];
+                            model.currentStoneRotation = (model.currentStoneRotation + rotationIncr + 4) % 4; 
+                        }
                     }
                 }
                 break;
@@ -344,11 +381,20 @@ var mvc = {
                             #   =>      ###
                             ##          #
                     */
-                    if(this.checkMovePossible(-1)){
-                        model.currentStone[0] = [model.currentStone[0][0]+1,model.currentStone[0][1]+1];
-                        model.currentStone[2] = [model.currentStone[2][0]-1,model.currentStone[2][1]-1];
-                        model.currentStone[3] = [model.currentStone[3][0]-2,model.currentStone[3][1]];
-                        model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                    if(rotationIncr === 1){
+                        if(this.checkMovePossible(-1)){
+                            model.currentStone[0] = [model.currentStone[0][0]+1,model.currentStone[0][1]+1];
+                            model.currentStone[2] = [model.currentStone[2][0]-1,model.currentStone[2][1]-1];
+                            model.currentStone[3] = [model.currentStone[3][0]-2,model.currentStone[3][1]];
+                            model.currentStoneRotation = (model.currentStoneRotation + rotationIncr + 4) % 4; 
+                        }
+                    }else{
+                        if(this.checkMovePossible(-1)){
+                            model.currentStone[0] = [model.currentStone[0][0]-1,model.currentStone[0][1]+1];
+                            model.currentStone[2] = [model.currentStone[2][0]+1,model.currentStone[2][1]-1];
+                            model.currentStone[3] = [model.currentStone[3][0],model.currentStone[3][1]-2];
+                            model.currentStoneRotation = (model.currentStoneRotation + rotationIncr + 4) % 4; 
+                        }
                     }
                 }else if(model.currentStoneRotation % 4 === 1){
                     /*
@@ -356,21 +402,37 @@ var mvc = {
                            ###   =>      #
                            #             #
                     */
-                    model.currentStone[0] = [model.currentStone[0][0]-1,model.currentStone[0][1]+1];
-                    model.currentStone[2] = [model.currentStone[2][0]+1,model.currentStone[2][1]-1];
-                    model.currentStone[3] = [model.currentStone[3][0],model.currentStone[3][1]-2];
-                    model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                    if(rotationIncr === 1){
+                        model.currentStone[0] = [model.currentStone[0][0]-1,model.currentStone[0][1]+1];
+                        model.currentStone[2] = [model.currentStone[2][0]+1,model.currentStone[2][1]-1];
+                        model.currentStone[3] = [model.currentStone[3][0],model.currentStone[3][1]-2];
+                        model.currentStoneRotation = (model.currentStoneRotation + rotationIncr + 4) % 4;
+                    }else{
+                        model.currentStone[0] = [model.currentStone[0][0]-1,model.currentStone[0][1]-1];
+                        model.currentStone[2] = [model.currentStone[2][0]+1,model.currentStone[2][1]+1];
+                        model.currentStone[3] = [model.currentStone[3][0]+2,model.currentStone[3][1]];
+                        model.currentStoneRotation = (model.currentStoneRotation + rotationIncr + 4) % 4;
+                    } 
                 }else if(model.currentStoneRotation % 4 === 2){
                     /*
                            ##             #
                             #   =>      ###
                             #             
                     */
-                    if(this.checkMovePossible(1)){
-                        model.currentStone[0] = [model.currentStone[0][0]-1,model.currentStone[0][1]-1];
-                        model.currentStone[2] = [model.currentStone[2][0]+1,model.currentStone[2][1]+1];
-                        model.currentStone[3] = [model.currentStone[3][0]+2,model.currentStone[3][1]];
-                        model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                    if(rotationIncr === 1){
+                        if(this.checkMovePossible(1)){
+                            model.currentStone[0] = [model.currentStone[0][0]-1,model.currentStone[0][1]-1];
+                            model.currentStone[2] = [model.currentStone[2][0]+1,model.currentStone[2][1]+1];
+                            model.currentStone[3] = [model.currentStone[3][0]+2,model.currentStone[3][1]];
+                            model.currentStoneRotation = (model.currentStoneRotation + rotationIncr + 4) % 4; 
+                        }
+                    }else{
+                        if(this.checkMovePossible(1)){
+                            model.currentStone[0] = [model.currentStone[0][0]+1,model.currentStone[0][1]-1];
+                            model.currentStone[2] = [model.currentStone[2][0]-1,model.currentStone[2][1]+1];
+                            model.currentStone[3] = [model.currentStone[3][0],model.currentStone[3][1]+2];
+                            model.currentStoneRotation = (model.currentStoneRotation + rotationIncr + 4) % 4; 
+                        }
                     }
                 }else if(model.currentStoneRotation % 4 === 3){
                     /*
@@ -378,38 +440,75 @@ var mvc = {
                            ###   =>      #
                                          ##
                     */
-                    model.currentStone[0] = [model.currentStone[0][0]+1,model.currentStone[0][1]-1];
-                    model.currentStone[2] = [model.currentStone[2][0]-1,model.currentStone[2][1]+1];
-                    model.currentStone[3] = [model.currentStone[3][0],model.currentStone[3][1]+2];
-                    model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                    if(rotationIncr === 1){
+                        model.currentStone[0] = [model.currentStone[0][0]+1,model.currentStone[0][1]-1];
+                        model.currentStone[2] = [model.currentStone[2][0]-1,model.currentStone[2][1]+1];
+                        model.currentStone[3] = [model.currentStone[3][0],model.currentStone[3][1]+2];
+                        model.currentStoneRotation = (model.currentStoneRotation + rotationIncr + 4) % 4; 
+                    }else{
+                        model.currentStone[0] = [model.currentStone[0][0]+1,model.currentStone[0][1]+1];
+                        model.currentStone[2] = [model.currentStone[2][0]-1,model.currentStone[2][1]-1];
+                        model.currentStone[3] = [model.currentStone[3][0]-2,model.currentStone[3][1]];
+                        model.currentStoneRotation = (model.currentStoneRotation + rotationIncr + 4) % 4; 
+                    }
                 }
                 break;
             case 6:
                 //[[0,0],[0,1],[0,2],[-1,2]]
                 if(model.currentStoneRotation % 4 === 0){
-                    if(this.checkMovePossible(1)){
-                        model.currentStone[0] = [model.currentStone[0][0]+1,model.currentStone[0][1]+1];
-                        model.currentStone[2] = [model.currentStone[2][0]-1,model.currentStone[2][1]-1];
-                        model.currentStone[3] = [model.currentStone[3][0],model.currentStone[3][1]-2];
-                        model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                    if(rotationIncr === 1){
+                        if(this.checkMovePossible(1)){
+                            model.currentStone[0] = [model.currentStone[0][0]+1,model.currentStone[0][1]+1];
+                            model.currentStone[2] = [model.currentStone[2][0]-1,model.currentStone[2][1]-1];
+                            model.currentStone[3] = [model.currentStone[3][0],model.currentStone[3][1]-2];
+                            model.currentStoneRotation = (model.currentStoneRotation + rotationIncr + 4) % 4; 
+                        }
+                    }else{
+                        if(this.checkMovePossible(1)){
+                            model.currentStone[0] = [model.currentStone[0][0]-1,model.currentStone[0][1]+1];
+                            model.currentStone[2] = [model.currentStone[2][0]+1,model.currentStone[2][1]-1];
+                            model.currentStone[3] = [model.currentStone[3][0]+2,model.currentStone[3][1]];
+                            model.currentStoneRotation = (model.currentStoneRotation + rotationIncr + 4) % 4; 
+                        }
                     }
                 }else if(model.currentStoneRotation % 4 === 1){
-                    model.currentStone[0] = [model.currentStone[0][0]-1,model.currentStone[0][1]+1];
-                    model.currentStone[2] = [model.currentStone[2][0]+1,model.currentStone[2][1]-1];
-                    model.currentStone[3] = [model.currentStone[3][0]+2,model.currentStone[3][1]];
-                    model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
-                }else if(model.currentStoneRotation % 4 === 2){
-                    if(this.checkMovePossible(-1)){
+                    if(rotationIncr === 1){
+                        model.currentStone[0] = [model.currentStone[0][0]-1,model.currentStone[0][1]+1];
+                        model.currentStone[2] = [model.currentStone[2][0]+1,model.currentStone[2][1]-1];
+                        model.currentStone[3] = [model.currentStone[3][0]+2,model.currentStone[3][1]];
+                    }else{
                         model.currentStone[0] = [model.currentStone[0][0]-1,model.currentStone[0][1]-1];
                         model.currentStone[2] = [model.currentStone[2][0]+1,model.currentStone[2][1]+1];
                         model.currentStone[3] = [model.currentStone[3][0],model.currentStone[3][1]+2];
-                        model.currentStoneRotation = (model.currentStoneRotation + 1) % 4;
+                    }
+                    model.currentStoneRotation = (model.currentStoneRotation + rotationIncr + 4) % 4; 
+                }else if(model.currentStoneRotation % 4 === 2){
+                    if(rotationIncr === 1){
+                        if(this.checkMovePossible(-1)){
+                            model.currentStone[0] = [model.currentStone[0][0]-1,model.currentStone[0][1]-1];
+                            model.currentStone[2] = [model.currentStone[2][0]+1,model.currentStone[2][1]+1];
+                            model.currentStone[3] = [model.currentStone[3][0],model.currentStone[3][1]+2];
+                            model.currentStoneRotation = (model.currentStoneRotation + rotationIncr + 4) % 4;
+                        }
+                    }else{
+                        if(this.checkMovePossible(-1)){
+                            model.currentStone[0] = [model.currentStone[0][0]+1,model.currentStone[0][1]-1];
+                            model.currentStone[2] = [model.currentStone[2][0]-1,model.currentStone[2][1]+1];
+                            model.currentStone[3] = [model.currentStone[3][0]-2,model.currentStone[3][1]];
+                            model.currentStoneRotation = (model.currentStoneRotation + rotationIncr + 4) % 4;
+                        }
                     }
                 }else if(model.currentStoneRotation % 4 === 3){
-                    model.currentStone[0] = [model.currentStone[0][0]+1,model.currentStone[0][1]-1];
-                    model.currentStone[2] = [model.currentStone[2][0]-1,model.currentStone[2][1]+1];
-                    model.currentStone[3] = [model.currentStone[3][0]-2,model.currentStone[3][1]];
-                    model.currentStoneRotation = (model.currentStoneRotation + 1) % 4; 
+                    if(rotationIncr === 1){
+                        model.currentStone[0] = [model.currentStone[0][0]+1,model.currentStone[0][1]-1];
+                        model.currentStone[2] = [model.currentStone[2][0]-1,model.currentStone[2][1]+1];
+                        model.currentStone[3] = [model.currentStone[3][0]-2,model.currentStone[3][1]];
+                    }else{
+                        model.currentStone[0] = [model.currentStone[0][0]+1,model.currentStone[0][1]+1];
+                        model.currentStone[2] = [model.currentStone[2][0]-1,model.currentStone[2][1]-1];
+                        model.currentStone[3] = [model.currentStone[3][0],model.currentStone[3][1]-2];
+                    }
+                    model.currentStoneRotation = (model.currentStoneRotation + rotationIncr + 4) % 4; 
                 }
                 break;
             default:
@@ -477,9 +576,11 @@ $(document).keydown(function(e){
 	if(key == "37"){ 
         mvc.moveCurrentStone("left");
     }else if(key == "38"){ //up
-		mvc.rotateCurrentStone();
+		mvc.rotateCurrentStone(1);
     }else if(key == "39"){
         mvc.moveCurrentStone("right");
+    }else if(key == "40"){
+        mvc.rotateCurrentStone(-1);
     }
 });
 
