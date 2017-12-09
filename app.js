@@ -55,44 +55,11 @@ var model = {
 
         model.currentStone = newStone;
         model.currentStoneRotation = 0;
-    },
-}
 
-var mvc = {
-    
-    init: function(){
-        view.init();
-        model.init();
-        setInterval(this.game,config.updatePeriod);
-    },
-    game: function(){
-        view.renderScene(model.board,model.currentStone,model.currentStoneType);
-        let moveCode = mvc.dropCurrentStone();
-        if(moveCode === 1){
-            model.generateNewStone();
-        }
-    },
-    dropCurrentStone: function(){
-        
-        if(!this.checkCollisionOnDrop()){
-
-            for(let i = 0; i < model.currentStone.length; i++){
-                let currentCell = model.currentStone[i];
-                currentCell[1]++;
-                model.currentStone[i] = currentCell;
-            }
-            return 0;
-        }else{
-            for(let i = 0; i < model.currentStone.length; i++){
-                let currentCell = model.currentStone[i];
-                model.board[currentCell[1]][currentCell[0]] = model.currentStoneType;
-            }
-
-            let fullRowArray = this.getFullRows(model.board); 
-            if(fullRowArray.length > 0){
-                this.dropFullRows(fullRowArray, model.board);
-            }
+        if(this.checkCollisionOnDrop()){
             return 1;
+        }else{
+            return 0;
         }
     },
     checkCollisionOnDrop: function(){
@@ -115,13 +82,107 @@ var mvc = {
         }
         return isCollision;
     },
+    stoneContainsCell: function(stone,cell){
+        let contains = false;
+        for(let i = 0; i< stone.length; i++){
+            stoneCell = stone[i];
+            if(stoneCell[0] === cell[0] && stoneCell[1] === cell[1]){
+                contains = true;
+                break;
+            }
+        }
+        return contains;
+    },
+    dropCurrentStone: function(){
+        
+        if(!this.checkCollisionOnDrop()){
+
+            for(let i = 0; i < this.currentStone.length; i++){
+                let currentCell = this.currentStone[i];
+                currentCell[1]++;
+                model.currentStone[i] = currentCell;
+            }
+            return 0;
+        }else{
+            for(let i = 0; i < this.currentStone.length; i++){
+                let currentCell = this.currentStone[i];
+                this.board[currentCell[1]][currentCell[0]] = this.currentStoneType;
+            }
+
+            let fullRowArray = this.getFullRows(); 
+            if(fullRowArray.length > 0){
+                this.dropFullRows(fullRowArray);
+            }
+            return 1;
+        }
+    },
+    isRowFull: function(rowIndex){
+        let row = model.board[rowIndex];
+        let rowFull = true;
+        for(let i = 0; i < row.length; i++){
+            if(row[i] === -1){
+                rowFull = false;
+                break;
+            }
+        }
+        return rowFull;
+    },
+    getFullRows: function(){
+        let numberOfRows = this.board.length;
+        let fullRowArray = [];
+        for(let i = 0; i < numberOfRows; i++){
+            if(this.isRowFull(i)){
+                fullRowArray.push(i);
+            }
+        }
+        return fullRowArray;
+    },
+    dropFullRows: function(fullRowArray){
+    
+        // Delete full rows
+        for(let j = 0; j < fullRowArray.length; j++){
+            let rowIndex = fullRowArray[j];
+            
+            for(let k = rowIndex; k > 0; k--){
+                
+                let row = this.board[k];
+                let rowAbove = this.board[k-1];
+                for(let i = 0; i < row.length; i++){
+                    row[i] = rowAbove[i];
+                }
+                this.board[k] = row;
+            }
+        }
+    },
+}
+
+var mvc = {
+    gameLoop: [],
+    init: function(){
+        view.init();
+        model.init();
+        gameLoop = setInterval(this.game,config.updatePeriod);
+    },
+    game: function(){
+        view.renderScene(model.board,model.currentStone,model.currentStoneType);
+        let moveCode = model.dropCurrentStone();
+        if(moveCode === 1){
+            if(model.generateNewStone() === 1){
+                clearInterval(this.gameLoop);
+                return 1;
+            }
+        }
+        return 0;
+    },
+    
+    
     checkCollisionOnShift: function(xIncr){
         let isCollision = false;
 
         for(let i = 0; i < model.currentStone.length; i++){
             let stoneCell = model.currentStone[i];
             let shiftedCell = [stoneCell[0]+xIncr,stoneCell[1]];
-            if(!this.stoneContainsCell(model.currentStone,shiftedCell)){
+            if(!model.stoneContainsCell(model.currentStone,shiftedCell)){
                 if(model.board[shiftedCell[1]][shiftedCell[0]] != -1 ){
                     //console.log("Stone reached other stone");
                     isCollision = true;
@@ -163,55 +224,7 @@ var mvc = {
         }
         return isMovePossible;
     },
-    stoneContainsCell: function(stone,cell){
-        let contains = false;
-        for(let i = 0; i< stone.length; i++){
-            stoneCell = stone[i];
-            if(stoneCell[0] === cell[0] && stoneCell[1] === cell[1]){
-                contains = true;
-                break;
-            }
-        }
-        return contains;
-    },
-    isRowFull: function(rowIndex){
-        let row = model.board[rowIndex];
-        let rowFull = true;
-        for(let i = 0; i < row.length; i++){
-            if(row[i] === -1){
-                rowFull = false;
-                break;
-            }
-        }
-        return rowFull;
-    },
-    getFullRows: function(board){
-        let numberOfRows = board.length;
-        let fullRowArray = [];
-        for(let i = 0; i < numberOfRows; i++){
-            if(this.isRowFull(i)){
-                fullRowArray.push(i);
-            }
-        }
-        return fullRowArray;
-    },
-    dropFullRows: function(fullRowArray, board){
     
-        // Delete full rows
-        for(let j = 0; j < fullRowArray.length; j++){
-            let rowIndex = fullRowArray[j];
-            
-            for(let k = rowIndex; k > 0; k--){
-                
-                let row = board[k];
-                let rowAbove = board[k-1];
-                for(let i = 0; i < row.length; i++){
-                    row[i] = rowAbove[i];
-                }
-                board[k] = row;
-            }
-        }
-    },
     rotateCurrentStone: function(rotationIncr){
         switch(model.currentStoneType){
             case 0:
