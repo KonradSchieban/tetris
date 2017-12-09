@@ -2,12 +2,14 @@ var config = {
     updatePeriod: 400,
     colorCode: ["blue","red","yellow","green","orange","brown","darkred"],
     backgroundColor: "black",
+    numCols: 9,
+    numRows: 15,
 }
 
 var model = {
     board: [],//[[0,0,0,0,0,0],[0,0,0,0,0,0],[0,1,1,0,1,0],...] board[y][x]
-    numCols: 9,
-    numRows: 15,
+    numCols: 0,
+    numRows: 0,
     currentStone: [], //[[1,2],[1,3],...] [[x1,y1],[x2,y2],...]
     currentStoneType: 1,
     currentStoneRotation: 0,
@@ -26,6 +28,8 @@ var model = {
         return JSON.parse(JSON.stringify(model.stoneShapes[index]));
     },
     init: function(){
+        this.numCols = config.numCols;
+        this.numRows = config.numRows;
         this.initBoard();
         this.generateNewStone();
     },
@@ -209,7 +213,6 @@ var mvc = {
         }
     },
     rotateCurrentStone: function(rotationIncr){
-        console.log(model.currentStoneRotation);
         switch(model.currentStoneType){
             case 0:
                 // [[0,0],[0,1],[1,0],[1,1]]
@@ -512,7 +515,7 @@ var mvc = {
                 }
                 break;
             default:
-                console.log("Rotation not implemented yet!");
+                //console.log("Rotation not implemented yet!");
         }
         
         view.renderScene(model.board,model.currentStone,model.currentStoneType);
@@ -556,13 +559,21 @@ var view = {
         view.renderCurrentStone(currentStone, currentStoneType);
     },
     init: function(){
+
+        let containerHeight = Math.floor($(window).height() * 0.9);
+        let canvasWidth = Math.floor(containerHeight*config.numCols/config.numRows);
+        
+        let canvas = document.getElementsByTagName('canvas')[0];
+        canvas.width  = canvasWidth;
+        canvas.height = containerHeight;
+
         //Canvas stuff
         this.canvas = $("#canvas")[0];
         this.ctx = canvas.getContext("2d");
         this.width = $("#canvas").width();
         this.height = $("#canvas").height();
         
-        this.cell_width = this.height/model.numRows;
+        this.cell_width = Math.floor(this.height/config.numRows);
     }
 }
 
