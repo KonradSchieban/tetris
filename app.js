@@ -1,5 +1,5 @@
 var config = {
-    updatePeriod: 400,
+    updatePeriod: [400,350,300,250,200,150,100,50],
     colorCode: ["blue","red","yellow","green","orange","brown","darkred"],
     backgroundColor: "black",
     numCols: 9,
@@ -76,11 +76,9 @@ var model = {
             let droppedCell = [stoneCell[0],stoneCell[1]+1];
             if(!this.stoneContainsCell(model.currentStone,droppedCell)){
                 if(droppedCell[1] >= model.numRows){
-                    //console.log("Stone reached bottom");
                     isCollision = true;
                     break;
                 }else if(model.board[droppedCell[1]][droppedCell[0]] != -1 ){
-                    //console.log("Stone reached other stone");
                     isCollision = true;
                     break;
                 }
@@ -120,8 +118,10 @@ var model = {
             if(numberDroppedRows > 0){
                 this.dropFullRows(fullRowArray);
                 this.droppedRows += numberDroppedRows;
+                return 2;
+            }else{
+                return 1;
             }
-            return 1;
         }
     },
     isRowFull: function(rowIndex){
@@ -169,7 +169,7 @@ var mvc = {
     init: function(){
         view.init();
         model.init();
-        gameLoop = setInterval(this.game,config.updatePeriod);
+        gameLoop = setInterval(this.game,config.updatePeriod[model.level()]);
     },
     decreaseUpdateInterval: function(decr){
         clearInterval(this.gameLoop);
@@ -179,7 +179,11 @@ var mvc = {
     game: function(){
         view.renderScene(model.board,model.currentStone,model.currentStoneType, model.droppedRows, model.level());
         let moveCode = model.dropCurrentStone();
-        if(moveCode === 1){
+        if(moveCode > 0){
+            if(moveCode === 2){
+                clearInterval(gameLoop);
+                gameLoop = setInterval(mvc.game,config.updatePeriod[model.level()]);
+            }
             if(model.generateNewStone() === 1){
                 console.log("clearing interval")
                 clearInterval(gameLoop);
