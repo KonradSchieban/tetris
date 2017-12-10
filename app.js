@@ -3,8 +3,10 @@ var config = {
     colorCode: ["blue","red","yellow","green","orange","brown","darkred"],
     backgroundColor: "black",
     numCols: 9,
-    numRows: 15,
+    numRows: 17,
 }
+
+var gameLoop;
 
 var model = {
     board: [],//[[0,0,0,0,0,0],[0,0,0,0,0,0],[0,1,1,0,1,0],...] board[y][x]
@@ -13,6 +15,10 @@ var model = {
     currentStone: [], //[[1,2],[1,3],...] [[x1,y1],[x2,y2],...]
     currentStoneType: 1,
     currentStoneRotation: 0,
+    droppedRows: 0,
+    level: function(){
+        return Math.floor(this.droppedRows/10);
+    },
     stoneShapes: [[[0,0],[0,1],[1,0],[1,1]],
                   [[0,0],[0,1],[1,1],[1,2]],
                   [[0,0],[1,0],[1,1],[2,1]],
@@ -109,9 +115,11 @@ var model = {
                 this.board[currentCell[1]][currentCell[0]] = this.currentStoneType;
             }
 
-            let fullRowArray = this.getFullRows(); 
-            if(fullRowArray.length > 0){
+            let fullRowArray = this.getFullRows();
+            let numberDroppedRows = fullRowArray.length; 
+            if(numberDroppedRows > 0){
                 this.dropFullRows(fullRowArray);
+                this.droppedRows += numberDroppedRows;
             }
             return 1;
         }
@@ -157,18 +165,24 @@ var model = {
 }
 
 var mvc = {
-    gameLoop: [],
+    
     init: function(){
         view.init();
         model.init();
         gameLoop = setInterval(this.game,config.updatePeriod);
     },
+    decreaseUpdateInterval: function(decr){
+        clearInterval(this.gameLoop);
+        config.updatePeriod -= decr;
+        this.gameLoop = setInterval(this.game,config.updatePeriod-decr);
+    },
     game: function(){
-        view.renderScene(model.board,model.currentStone,model.currentStoneType);
+        view.renderScene(model.board,model.currentStone,model.currentStoneType, model.droppedRows, model.level());
         let moveCode = model.dropCurrentStone();
         if(moveCode === 1){
             if(model.generateNewStone() === 1){
-                clearInterval(this.gameLoop);
+                console.log("clearing interval")
+                clearInterval(gameLoop);
                 return 1;
             }
         }
@@ -184,7 +198,6 @@ var mvc = {
             let shiftedCell = [stoneCell[0]+xIncr,stoneCell[1]];
             if(!model.stoneContainsCell(model.currentStone,shiftedCell)){
                 if(model.board[shiftedCell[1]][shiftedCell[0]] != -1 ){
-                    //console.log("Stone reached other stone");
                     isCollision = true;
                     break;
                 }
@@ -206,7 +219,7 @@ var mvc = {
                 model.currentStone[i] = newCurrentStoneCell;
             }
         }
-        view.renderScene(model.board,model.currentStone,model.currentStoneType);
+        view.renderScene(model.board, model.currentStone, model.currentStoneType, model.droppedRows, model.level());
     },
     checkMovePossible: function(xIncr){
         let isMovePossible = true;
@@ -531,7 +544,7 @@ var mvc = {
                 //console.log("Rotation not implemented yet!");
         }
         
-        view.renderScene(model.board,model.currentStone,model.currentStoneType);
+        view.renderScene(model.board, model.currentStone, model.currentStoneType, model.droppedRows, model.level());
     }
 }
 
@@ -567,13 +580,18 @@ var view = {
         }
         return;
     },
-    renderScene: function(board, currentStone, currentStoneType){
+    renderScene: function(board, currentStone, currentStoneType, droppedRows, level){
         view.renderBoard(board);
         view.renderCurrentStone(currentStone, currentStoneType);
+        view.renderInfos(droppedRows, level);
+    },
+    renderInfos: function(droppedRows, level){
+        document.getElementById("rows").innerHTML = "Score: " + droppedRows;
+        document.getElementById("level").innerHTML = "Level: " + level;
     },
     init: function(){
 
-        let containerHeight = Math.floor($(window).height() * 0.9);
+        let containerHeight = Math.floor($(window).height() * 0.8);
         let canvasWidth = Math.floor(containerHeight*config.numCols/config.numRows);
         
         let canvas = document.getElementsByTagName('canvas')[0];

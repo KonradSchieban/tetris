@@ -1,15 +1,25 @@
 body{
     box-sizing: border-box;
     background-color: #ffe9db;
+    font-family: 'Nunito', sans-serif;    
+}
+h1{
+    text-align: center;
 }
 #main-container{
     overflow:hidden;
+    padding: 0;
+    margin: auto;
+    display: block;
 }
 #game-container{
-    width:80%;
+    width: 85%;
+    float: left;
 }
 #info-container{
-    width:20%;
+    width: 15%;
+    float: left;
+    margin-top: 20%
 }
 #canvas{
     padding: 0;
