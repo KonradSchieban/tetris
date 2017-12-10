@@ -5,7 +5,7 @@ function push_to_aws{
         [string] $bucket_name
     )
     aws s3 sync .\ "s3://$bucket_name/" --acl public-read
-    aws s3 rm "s3://$bucket_name/".git
+    aws s3 rm "s3://$bucket_name/.git"
 
     return 0
 }
