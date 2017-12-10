@@ -3,8 +3,25 @@ body{
     background-color: #ffe9db;
     font-family: 'Nunito', sans-serif;    
 }
+#heading{
+    background-color: black;
+    margin-bottom: -21px;
+    margin-top: -20px;
+    width: 98%;
+    border-radius: 5px;
+}
 h1{
     text-align: center;
+    color: white;
+}
+#left-container{
+    border: 1px solid #ffe9db;
+    background-color: #ffe9db;
+    float:left;
+}
+#game-container{
+    /*border: 1px solid black;*/
+    float:left;
 }
 #main-container{
     overflow:hidden;
@@ -12,9 +29,10 @@ h1{
     margin: auto;
     display: block;
 }
-#game-container{
-    width: 85%;
-    float: left;
+#right-container{
+    /*border: 1px solid black;*/
+    border: 1px solid #ffe9db;
+    float:left;
 }
 #info-container{
     width: 15%;

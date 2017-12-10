@@ -590,8 +590,8 @@ var view = {
         view.renderInfos(droppedRows, level);
     },
     renderInfos: function(droppedRows, level){
-        document.getElementById("rows").innerHTML = "Score: " + droppedRows;
-        document.getElementById("level").innerHTML = "Level: " + level;
+        //document.getElementById("rows").innerHTML = "Score: " + droppedRows;
+        //document.getElementById("level").innerHTML = "Level: " + level;
     },
     init: function(){
 
@@ -609,6 +609,21 @@ var view = {
         this.height = $("#canvas").height();
         
         this.cell_width = Math.floor(this.height/config.numRows);
+
+        let windowHeight = $(window).height();
+        let windowWidth = $(window).width();
+        console.log(windowHeight);
+        console.log(windowWidth);
+
+        let sideBarWidth = (windowWidth - this.width)/2;
+        console.log(sideBarWidth);
+
+
+
+        //document.getElementById("game-container").style.width = canvas.width;
+        document.getElementById("main-container").style.width = windowWidth;
+        document.getElementById("left-container").style.width = sideBarWidth + "px"
+        document.getElementById("right-container").style.width = sideBarWidth + "px"
     }
 }
 
