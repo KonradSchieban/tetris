@@ -192,7 +192,13 @@ var mvc = {
         }
         return 0;
     },
-    
+    dropStoneAllWay: function(){
+        
+        while(model.dropCurrentStone() === 0){
+            
+        };
+        
+    },
     
     checkCollisionOnShift: function(xIncr){
         let isCollision = false;
@@ -631,7 +637,8 @@ $(document).ready(function(){
 
 $(document).keydown(function(e){
 	var key = e.which;
-	
+    console.log(key);
+    
 	if(key == "37"){ 
         mvc.moveCurrentStone("left");
     }else if(key == "38"){ //up
@@ -639,7 +646,10 @@ $(document).keydown(function(e){
     }else if(key == "39"){
         mvc.moveCurrentStone("right");
     }else if(key == "40"){
-        mvc.rotateCurrentStone(-1);
+        //mvc.rotateCurrentStone(-1);
+        mvc.dropStoneAllWay();
+    }else if(key == "32"){
+        mvc.dropStoneAllWay();
     }
 });
 
