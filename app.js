@@ -2,7 +2,7 @@ var config = {
     updatePeriod: [400,350,300,250,200,150,100,50],
     colorCode: ["blue","red","yellow","green","orange","brown","darkred"],
     backgroundColor: "black",
-    numCols: 9,
+    numCols: 10,
     numRows: 17,
 }
 
@@ -590,8 +590,8 @@ var view = {
         view.renderInfos(droppedRows, level);
     },
     renderInfos: function(droppedRows, level){
-        //document.getElementById("rows").innerHTML = "Score: " + droppedRows;
-        //document.getElementById("level").innerHTML = "Level: " + level;
+        document.getElementById("rows").innerHTML = "Rows: " + droppedRows;
+        document.getElementById("level").innerHTML = "Level: " + level;
     },
     init: function(){
 
@@ -618,12 +618,10 @@ var view = {
         let sideBarWidth = (windowWidth - this.width)/2;
         console.log(sideBarWidth);
 
-
-
-        //document.getElementById("game-container").style.width = canvas.width;
         document.getElementById("main-container").style.width = windowWidth;
         document.getElementById("left-container").style.width = sideBarWidth + "px"
         document.getElementById("right-container").style.width = sideBarWidth + "px"
+
     }
 }
 

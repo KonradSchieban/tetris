@@ -7,7 +7,7 @@ body{
     background-color: black;
     margin-bottom: -21px;
     margin-top: -20px;
-    width: 98%;
+    width: 99%;
     border-radius: 5px;
 }
 h1{
@@ -43,4 +43,25 @@ h1{
     padding: 0;
     margin: auto;
     display: block;
+}
+#footer{
+    color: white; 
+    overflow: auto;
+    border-radius: 5px;
+    width: 99%;
+    margin-top: -12px;
+    text-align: center;
+    font-size: 16px;
+}
+#level-container{
+    border: 1px solid black;
+    float:left;
+    width:49%;
+    background-color: black;
+}
+#row-container{
+    border: 1px solid black;
+    float:left;
+    width:49%;
+    background-color: black;
 }
