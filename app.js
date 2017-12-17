@@ -645,11 +645,10 @@ $(document).keydown(function(e){
 		mvc.rotateCurrentStone(1);
     }else if(key == "39"){
         mvc.moveCurrentStone("right");
-    }else if(key == "40"){
-        //mvc.rotateCurrentStone(-1);
-        mvc.dropStoneAllWay();
+    }else if(key == "40"){//down
+        mvc.game();
     }else if(key == "32"){
-        mvc.dropStoneAllWay();
+        mvc.game();
     }
 });
 
