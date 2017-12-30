@@ -199,7 +199,35 @@ var mvc = {
         };
         
     },
-    
+    getCurrentStoneCoordBoorders: function(){
+        
+        let xMin = config.numCols-1;
+        let xMax = 0;
+        let yMin = config.numRows-1;
+        let yMax = 0;
+        for(let i = 0; i < model.currentStone.length; i++){
+            let currentStoneCell = model.currentStone[i];
+            if(currentStoneCell[0] > xMax){
+                xMax = currentStoneCell[0];
+            }
+            if(currentStoneCell[1] > yMax){
+                yMax = currentStoneCell[1];
+            }
+            if(currentStoneCell[0] < xMin){
+                xMin = currentStoneCell[0];
+            }
+            if(currentStoneCell[1] < yMin){
+                yMin = currentStoneCell[1];
+            }
+        }
+        xMinSceneCoord = view.sceneLeftBorder + xMin*view.cell_width;
+        xMaxSceneCoord = view.sceneLeftBorder + (xMax+1)*view.cell_width;
+        yMinSceneCoord = view.sceneUpperBorder + yMin*view.cell_width;
+        yMaxSceneCoord = view.sceneUpperBorder + (yMax+1)*view.cell_width;
+
+        return [xMinSceneCoord, xMaxSceneCoord, yMinSceneCoord, yMaxSceneCoord];
+
+    },
     checkCollisionOnShift: function(xIncr){
         let isCollision = false;
 
@@ -564,6 +592,10 @@ var view = {
     width: 0,
     heigth: 0,
     cell_width: 0,
+    sceneLeftBorder: 0,
+    sceneRightBorder: 0,
+    sceneUpperBorder: 0,
+    sceneLowerBorder: 0,
     paintCell: function(x, y, color){
         this.ctx.fillStyle = color;
         this.ctx.fillRect(x*this.cell_width, y*this.cell_width, this.cell_width, this.cell_width);
@@ -618,15 +650,19 @@ var view = {
 
         let windowHeight = $(window).height();
         let windowWidth = $(window).width();
-        console.log(windowHeight);
-        console.log(windowWidth);
 
         let sideBarWidth = (windowWidth - this.width)/2;
-        console.log(sideBarWidth);
 
         document.getElementById("main-container").style.width = windowWidth;
         document.getElementById("left-container").style.width = sideBarWidth + "px"
         document.getElementById("right-container").style.width = sideBarWidth + "px"
+
+
+        let canvasRect = document.getElementById("canvas").getBoundingClientRect();
+        this.sceneLeftBorder = canvasRect.left;
+        this.sceneLowerBorder = canvasRect.bottom;
+        this.sceneRightBorder = canvasRect.right;
+        this.sceneUpperBorder = canvasRect.top;
 
     }
 }
@@ -652,3 +688,29 @@ $(document).keydown(function(e){
     }
 });
 
+function handleClickEvents(event) {
+    var x = event.clientX;
+    var y = event.clientY;
+    var coords = "X coords: " + x + ", Y coords: " + y;
+    console.log(coords);
+
+    let canvasRect = document.getElementById("canvas").getBoundingClientRect();
+    let canvasMiddle = canvasRect.left + canvasRect.width/2;
+
+    console.log(mvc.getCurrentStoneCoordBoorders());
+    currentStoneCoordBorders = mvc.getCurrentStoneCoordBoorders();
+    if(x > 0.9*currentStoneCoordBorders[0] && x < 1.1*currentStoneCoordBorders[1]){
+        if(y > 0.9*currentStoneCoordBorders[2] && y < 1.1*currentStoneCoordBorders[3]){
+            mvc.rotateCurrentStone(1);
+        }else if(y > 1.1*currentStoneCoordBorders[3]){
+            mvc.game();
+        }
+    }
+    else{
+        if(x < canvasMiddle){
+            mvc.moveCurrentStone("left");
+        }else{
+            mvc.moveCurrentStone("right");
+        }
+    }
+}
