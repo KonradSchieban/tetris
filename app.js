@@ -634,19 +634,19 @@ var view = {
     init: function(){
 
         let containerHeight = Math.floor($(window).height() * 0.8);
-        let canvasWidth = Math.floor(containerHeight*config.numCols/config.numRows);
-        
+        this.cell_width = Math.floor(containerHeight/config.numRows);
+        let canvasWidth = config.numCols * this.cell_width;
+        let canvasHeight = config.numRows * this.cell_width;
+
         let canvas = document.getElementsByTagName('canvas')[0];
         canvas.width  = canvasWidth;
-        canvas.height = containerHeight;
+        canvas.height = canvasHeight;
 
         //Canvas stuff
         this.canvas = $("#canvas")[0];
         this.ctx = canvas.getContext("2d");
         this.width = $("#canvas").width();
         this.height = $("#canvas").height();
-        
-        this.cell_width = Math.floor(this.height/config.numRows);
 
         let windowHeight = $(window).height();
         let windowWidth = $(window).width();
@@ -666,6 +666,10 @@ var view = {
 
     }
 }
+
+$(window).resize(function () {
+    view.init();
+});
 
 $(document).ready(function(){
 	mvc.init();

@@ -1,7 +1,8 @@
 body{
     box-sizing: border-box;
     background-color: #ffe9db;
-    font-family: 'Nunito', sans-serif;    
+    font-family: 'Nunito', sans-serif;   
+    overflow: hidden; 
 }
 #heading{
     background-color: black;
